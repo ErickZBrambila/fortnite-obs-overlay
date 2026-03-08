@@ -137,6 +137,55 @@ Alternatively, set `DEFAULT_USERNAME` in `.env` to auto-load a player on server 
 
 ---
 
+## Log Polling (Real-time Kill Detection)
+
+Log polling watches Fortnite's local game log file to detect kills, match start/end, and placements in real time — without waiting for the API poll interval.
+
+### Enable on Windows
+
+1. Open your `.env` file
+2. Add the following line, replacing `YourName` with your actual Windows username:
+
+```env
+FORTNITE_LOG_PATH=C:\Users\YourName\AppData\Local\FortniteGame\Saved\Logs\FortniteGame.log
+```
+
+**To find your username:** open a Command Prompt and run `echo %USERNAME%`
+
+**Can't find the folder?** It may be hidden. In File Explorer, go to the View tab and check **"Hidden items"**, then navigate to:
+```
+C:\Users\YourName\AppData\Local\FortniteGame\Saved\Logs\
+```
+
+### Enable on macOS
+
+Fortnite does not run natively on macOS. If you're using CrossOver:
+
+```env
+FORTNITE_LOG_PATH=/Users/YourName/Library/Application Support/CrossOver/Bottles/Fortnite/drive_c/users/YourName/AppData/Local/FortniteGame/Saved/Logs/FortniteGame.log
+```
+
+### Disable log polling
+
+Leave `FORTNITE_LOG_PATH` blank (or remove it entirely) to disable:
+
+```env
+FORTNITE_LOG_PATH=
+```
+
+### What log polling adds
+
+| Event | WebSocket message |
+|-------|-------------------|
+| Kill confirmed | `log_kill` — victim name + weapon |
+| Match started | `log_match_start` — game mode |
+| Match ended | `log_match_end` — placement + total players |
+| You were downed | `log_downed` |
+
+> **Note:** The log file is only written while Fortnite is running. If the file doesn't exist yet, the server will warn on startup and retry when it appears.
+
+---
+
 ## Theming
 
 Change the theme by editing the `data-theme` attribute on the `<body>` tag in the overlay HTML files:

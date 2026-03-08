@@ -23,7 +23,7 @@ let pollTimer: ReturnType<typeof setInterval> | null = null;
 let squadPollTimer: ReturnType<typeof setInterval> | null = null;
 let logParser: LogParser | null = null;
 
-const VALID_THEMES = ['fortnite', 'minimal', 'neon', 'dark', 'gold', 'purple'];
+const VALID_THEMES = ['fortnite', 'minimal', 'neon', 'dark', 'gold', 'purple', 'glass'];
 
 // ─── Broadcast ───────────────────────────────────────────────────────────────
 
