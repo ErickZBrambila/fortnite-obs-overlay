@@ -145,6 +145,52 @@
   --fn-font:           'Rajdhani', 'Barlow Condensed', 'Arial Narrow', sans-serif;
 }
 
+/* ─── Glass / Frosted theme ────────────────────────────────────────────────── */
+[data-theme="glass"] {
+  --fn-bg:             rgba(255, 255, 255, 0.07);
+  --fn-bg-panel:       rgba(255, 255, 255, 0.10);
+  --fn-bg-header:      rgba(255, 255, 255, 0.16);
+  --fn-bg-row-alt:     rgba(255, 255, 255, 0.04);
+
+  --fn-accent:         #ffffff;
+  --fn-accent-dim:     rgba(255, 255, 255, 0.28);
+  --fn-accent-glow:    rgba(255, 255, 255, 0.12);
+  --fn-gold:           #a8d8ff;
+  --fn-gold-dim:       rgba(168, 216, 255, 0.22);
+  --fn-red:            #ff6b88;
+
+  --fn-text:           #ffffff;
+  --fn-text-sub:       rgba(255, 255, 255, 0.60);
+  --fn-text-muted:     rgba(255, 255, 255, 0.28);
+
+  --fn-border:         rgba(255, 255, 255, 0.16);
+  --fn-border-gold:    rgba(168, 216, 255, 0.38);
+  --fn-corner:         0px;
+
+  --fn-font:           'Inter', 'SF Pro Display', system-ui, sans-serif;
+}
+
+/* Glassmorphism panel — replaces clip-path with blur + rounded corners */
+[data-theme="glass"] .fn-panel {
+  backdrop-filter: blur(20px) saturate(160%);
+  -webkit-backdrop-filter: blur(20px) saturate(160%);
+  border-radius: 12px;
+  clip-path: none;
+  border: 1px solid rgba(255, 255, 255, 0.20);
+  box-shadow:
+    0 4px 24px rgba(0, 0, 0, 0.25),
+    inset 0 1px 0 rgba(255, 255, 255, 0.20);
+}
+
+[data-theme="glass"] .fn-header {
+  border-radius: 12px 12px 0 0;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.14);
+}
+
+[data-theme="glass"] .fn-value-gold {
+  text-shadow: 0 0 12px rgba(168, 216, 255, 0.50);
+}
+
 /* ─── Shared resets & base ─────────────────────────────────────────────────── */
 *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 

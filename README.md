@@ -146,6 +146,10 @@ Change the theme by editing the `data-theme` attribute on the `<body>` tag in th
 <body data-theme="fortnite">   <!-- default: Fortnite native blue -->
 <body data-theme="minimal">    <!-- clean dark monochrome -->
 <body data-theme="neon">       <!-- purple/cyan neon -->
+<body data-theme="dark">       <!-- near-black, no color -->
+<body data-theme="gold">       <!-- Victory Royale gold -->
+<body data-theme="purple">     <!-- royal purple -->
+<body data-theme="glass">      <!-- frosted glass, semi-transparent -->
 ```
 
 To add a custom theme, add a new `[data-theme="yourtheme"]` block to `overlay/shared/theme.css` and override the CSS variables.
