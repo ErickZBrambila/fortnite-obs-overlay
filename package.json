@@ -7,7 +7,11 @@
     "dev": "npx ts-node-dev --respawn --transpile-only --watch .env src/server.ts",
     "dev:bun": "bun run --watch src/server.ts",
     "build": "tsc",
-    "start": "node dist/server.js"
+    "start": "node dist/server.js",
+    "release:patch": "npm version patch",
+    "release:minor": "npm version minor",
+    "release:major": "npm version major",
+    "postversion": "git push && git push --tags"
   },
   "dependencies": {
     "dotenv": "^16.4.5",
