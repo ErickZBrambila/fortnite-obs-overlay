@@ -1,0 +1,207 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Fortnite Overview Overlay</title>
+  <link rel="stylesheet" href="style.css" />
+</head>
+<!--
+  THEME: Change data-theme on <body> to switch themes.
+  Options: "fortnite" (default) | "minimal" | "neon"
+-->
+<body data-theme="fortnite">
+
+  <!-- ── Idle ──────────────────────────────────────────────────────────────── -->
+  <div id="idleScreen" class="fn-panel overlay-root">
+    <div class="state-screen">
+      <span class="state-msg">Enter Epic Username</span>
+      <input id="usernameInput" type="text" placeholder="EPIC USERNAME" maxlength="32" autocomplete="off" spellcheck="false" />
+      <button id="startBtn">Load Stats</button>
+    </div>
+  </div>
+
+  <!-- ── Loading ───────────────────────────────────────────────────────────── -->
+  <div id="loadingScreen" class="fn-panel overlay-root hidden">
+    <div class="state-screen">
+      <div class="fn-dot loading"></div>
+      <span class="state-msg" id="loadingMsg">Loading…</span>
+    </div>
+  </div>
+
+  <!-- ── Error ─────────────────────────────────────────────────────────────── -->
+  <div id="errorScreen" class="fn-panel overlay-root hidden">
+    <div class="state-screen">
+      <div class="fn-dot error"></div>
+      <span class="state-msg" id="errorMsg">Error</span>
+      <button id="retryBtn">Retry</button>
+    </div>
+  </div>
+
+  <!-- ── Stats panel ────────────────────────────────────────────────────────── -->
+  <div id="statsPanel" class="fn-panel overlay-root hidden">
+
+    <!-- Header -->
+    <div class="header">
+      <div class="player-info">
+        <span class="player-name" id="playerName">—</span>
+        <span class="bp-info" id="bpInfo"></span>
+      </div>
+      <div class="status-badge">
+        <div class="fn-dot live" id="statusDot"></div>
+        <span>Live</span>
+      </div>
+    </div>
+
+    <!-- Overall (all-time) -->
+    <div class="section-title">All-Time Stats</div>
+    <div class="overall-grid">
+      <div class="overall-cell">
+        <div class="fn-label">Wins</div>
+        <div class="fn-value fn-value-gold" id="allWins">—</div>
+      </div>
+      <div class="overall-cell">
+        <div class="fn-label">K/D</div>
+        <div class="fn-value fn-value-accent" id="allKD">—</div>
+      </div>
+      <div class="overall-cell">
+        <div class="fn-label">Kills</div>
+        <div class="fn-value" id="allKills">—</div>
+      </div>
+      <div class="overall-cell">
+        <div class="fn-label">Win %</div>
+        <div class="fn-value" id="allWinRate">—</div>
+      </div>
+      <div class="overall-cell">
+        <div class="fn-label">Matches</div>
+        <div class="fn-value" id="allMatches">—</div>
+      </div>
+    </div>
+
+    <!-- Per-mode breakdown -->
+    <div class="section-title">By Mode</div>
+    <div class="mode-tabs">
+
+      <div class="mode-tab">
+        <div class="mode-tab-header">Solos</div>
+        <div class="mode-stats">
+          <div class="mode-stat">
+            <span class="fn-label">Wins</span>
+            <span class="fn-value fn-value-gold" id="soloWins">—</span>
+          </div>
+          <div class="mode-stat">
+            <span class="fn-label">K/D</span>
+            <span class="fn-value fn-value-accent" id="soloKD">—</span>
+          </div>
+          <div class="mode-stat">
+            <span class="fn-label">Kills</span>
+            <span class="fn-value" id="soloKills">—</span>
+          </div>
+          <div class="mode-stat">
+            <span class="fn-label">Matches</span>
+            <span class="fn-value" id="soloMatches">—</span>
+          </div>
+          <div class="mode-stat">
+            <span class="fn-label">Win %</span>
+            <span class="fn-value" id="soloWinRate">—</span>
+          </div>
+          <div class="mode-stat">
+            <span class="fn-label">K/Match</span>
+            <span class="fn-value" id="soloKPM">—</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="mode-tab">
+        <div class="mode-tab-header">Duos</div>
+        <div class="mode-stats">
+          <div class="mode-stat">
+            <span class="fn-label">Wins</span>
+            <span class="fn-value fn-value-gold" id="duoWins">—</span>
+          </div>
+          <div class="mode-stat">
+            <span class="fn-label">K/D</span>
+            <span class="fn-value fn-value-accent" id="duoKD">—</span>
+          </div>
+          <div class="mode-stat">
+            <span class="fn-label">Kills</span>
+            <span class="fn-value" id="duoKills">—</span>
+          </div>
+          <div class="mode-stat">
+            <span class="fn-label">Matches</span>
+            <span class="fn-value" id="duoMatches">—</span>
+          </div>
+          <div class="mode-stat">
+            <span class="fn-label">Win %</span>
+            <span class="fn-value" id="duoWinRate">—</span>
+          </div>
+          <div class="mode-stat">
+            <span class="fn-label">K/Match</span>
+            <span class="fn-value" id="duoKPM">—</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="mode-tab">
+        <div class="mode-tab-header">Squads</div>
+        <div class="mode-stats">
+          <div class="mode-stat">
+            <span class="fn-label">Wins</span>
+            <span class="fn-value fn-value-gold" id="squadWins">—</span>
+          </div>
+          <div class="mode-stat">
+            <span class="fn-label">K/D</span>
+            <span class="fn-value fn-value-accent" id="squadKD">—</span>
+          </div>
+          <div class="mode-stat">
+            <span class="fn-label">Kills</span>
+            <span class="fn-value" id="squadKills">—</span>
+          </div>
+          <div class="mode-stat">
+            <span class="fn-label">Matches</span>
+            <span class="fn-value" id="squadMatches">—</span>
+          </div>
+          <div class="mode-stat">
+            <span class="fn-label">Win %</span>
+            <span class="fn-value" id="squadWinRate">—</span>
+          </div>
+          <div class="mode-stat">
+            <span class="fn-label">K/Match</span>
+            <span class="fn-value" id="squadKPM">—</span>
+          </div>
+        </div>
+      </div>
+
+    </div>
+
+    <!-- Session summary -->
+    <div class="section-title">This Session</div>
+    <div class="session-strip">
+      <div class="session-cell">
+        <div class="fn-label">Kills</div>
+        <div class="fn-value fn-value-accent" id="sesKills">0</div>
+      </div>
+      <div class="session-cell">
+        <div class="fn-label">K/D</div>
+        <div class="fn-value fn-value-gold" id="sesKD">0.00</div>
+      </div>
+      <div class="session-cell">
+        <div class="fn-label">Matches</div>
+        <div class="fn-value" id="sesMatches">0</div>
+      </div>
+      <div class="session-cell">
+        <div class="fn-label">Wins</div>
+        <div class="fn-value fn-value-gold" id="sesWins">0</div>
+      </div>
+    </div>
+
+    <div class="footer">
+      <span class="footer-text">Updated: <span id="lastUpdated">—</span></span>
+      <span class="footer-text">fortnite-obs-overlay</span>
+    </div>
+
+  </div>
+
+  <script src="overlay.js"></script>
+</body>
+</html>

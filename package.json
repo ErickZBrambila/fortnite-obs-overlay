@@ -1,0 +1,24 @@
+{
+  "name": "fortnite-obs-overlay",
+  "version": "1.0.0",
+  "description": "Fortnite player stats overlay for OBS with live session tracking",
+  "main": "dist/server.js",
+  "scripts": {
+    "dev": "npx ts-node-dev --respawn --transpile-only --watch .env src/server.ts",
+    "dev:bun": "bun run --watch src/server.ts",
+    "build": "tsc",
+    "start": "node dist/server.js"
+  },
+  "dependencies": {
+    "dotenv": "^16.4.5",
+    "express": "^4.19.2",
+    "ws": "^8.17.1"
+  },
+  "devDependencies": {
+    "@types/express": "^4.17.21",
+    "@types/node": "^20.14.9",
+    "@types/ws": "^8.5.11",
+    "ts-node-dev": "^2.0.0",
+    "typescript": "^5.5.3"
+  }
+}

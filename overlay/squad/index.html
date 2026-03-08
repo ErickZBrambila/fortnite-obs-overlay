@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Fortnite Squad Overlay</title>
+  <link rel="stylesheet" href="style.css" />
+</head>
+<!--
+  THEME: Change data-theme on <body> to set the initial theme (overridden live by server).
+  Options: "fortnite" | "minimal" | "neon" | "dark" | "gold" | "purple"
+-->
+<body data-theme="fortnite">
+
+  <!-- ── Idle: no squad configured ─────────────────────────────────────────── -->
+  <div id="idleScreen" class="fn-panel squad-root">
+    <div class="state-screen">
+      <div class="fn-dot loading"></div>
+      <span class="state-msg">No squad configured</span>
+      <span class="state-sub">Add players in the Control Panel</span>
+    </div>
+  </div>
+
+  <!-- ── Squad stats panel ─────────────────────────────────────────────────── -->
+  <div id="squadPanel" class="fn-panel squad-root hidden">
+
+    <div class="squad-header">
+      <div class="fn-dot live"></div>
+      <span class="squad-title">Squad Session</span>
+      <span class="mode-badge hidden" id="modeBadge"></span>
+      <span class="squad-timer" id="squadTimer">0:00:00</span>
+    </div>
+
+    <!-- Player cards injected by JS -->
+    <div class="squad-grid" id="squadGrid"></div>
+
+    <div class="squad-footer">
+      <span id="lastUpdated"></span>
+    </div>
+
+  </div>
+
+  <script src="overlay.js"></script>
+</body>
+</html>

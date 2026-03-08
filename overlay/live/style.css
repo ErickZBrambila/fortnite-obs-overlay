@@ -1,0 +1,199 @@
+@import url('https://fonts.googleapis.com/css2?family=Rajdhani:wght@500;600;700&display=swap');
+@import url('../shared/theme.css');
+
+body {
+  width: 260px;
+  padding: 0;
+  user-select: none;
+}
+
+.overlay-root {
+  width: 260px;
+}
+
+/* ─── Header ─────────────────────────────────────────────────────────────────*/
+.header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 6px 12px;
+  background: var(--fn-bg-header);
+  border-bottom: 1px solid var(--fn-accent-dim);
+}
+
+.player-name {
+  font-size: 15px;
+  font-weight: 700;
+  color: var(--fn-text);
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 170px;
+}
+
+.bp-level {
+  font-size: 11px;
+  font-weight: 700;
+  color: var(--fn-gold);
+  letter-spacing: 0.08em;
+  white-space: nowrap;
+}
+
+/* ─── Session banner ─────────────────────────────────────────────────────────*/
+.session-label {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 4px 12px;
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--fn-text-sub);
+  border-bottom: 1px solid var(--fn-border);
+}
+
+.mode-badge {
+  margin-left: auto;
+  font-size: 9px;
+  font-weight: 700;
+  letter-spacing: 0.1em;
+  color: var(--fn-gold);
+  background: rgba(255, 196, 0, 0.12);
+  border: 1px solid var(--fn-gold);
+  padding: 1px 5px;
+}
+
+/* ─── KD big display ─────────────────────────────────────────────────────────*/
+.kd-row {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0;
+  padding: 10px 12px 8px;
+  border-bottom: 1px solid var(--fn-border);
+}
+
+.kd-block {
+  flex: 1;
+  text-align: center;
+}
+
+.kd-sep {
+  width: 1px;
+  height: 36px;
+  background: var(--fn-border);
+  margin: 0 8px;
+}
+
+/* ─── Stats grid ─────────────────────────────────────────────────────────────*/
+.stats-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr 1fr;
+  gap: 0;
+}
+
+.stat-cell {
+  text-align: center;
+  padding: 8px 6px;
+  border-right: 1px solid var(--fn-border);
+}
+
+.stat-cell:last-child {
+  border-right: none;
+}
+
+.stat-cell:nth-child(n+4) {
+  border-top: 1px solid var(--fn-border);
+}
+
+/* ─── Footer ─────────────────────────────────────────────────────────────────*/
+.footer {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 4px 12px;
+  border-top: 1px solid var(--fn-border);
+}
+
+.timer {
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--fn-text-sub);
+  letter-spacing: 0.06em;
+}
+
+.last-updated {
+  font-size: 10px;
+  color: var(--fn-text-muted);
+}
+
+/* ─── Idle / loading state ───────────────────────────────────────────────────*/
+.state-screen {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 20px 16px;
+  gap: 10px;
+  min-height: 100px;
+}
+
+.state-screen input {
+  width: 100%;
+  background: rgba(0,0,0,0.5);
+  border: 1px solid var(--fn-accent-dim);
+  color: var(--fn-text);
+  font-family: var(--fn-font);
+  font-size: 14px;
+  font-weight: 600;
+  padding: 6px 10px;
+  outline: none;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.state-screen input:focus {
+  border-color: var(--fn-accent);
+  box-shadow: 0 0 8px var(--fn-accent-glow);
+}
+
+.state-screen button {
+  width: 100%;
+  background: var(--fn-accent);
+  border: none;
+  color: #000;
+  font-family: var(--fn-font);
+  font-size: 13px;
+  font-weight: 800;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  padding: 7px;
+  cursor: pointer;
+  clip-path: polygon(
+    0 4px, 4px 0, calc(100% - 4px) 0, 100% 4px,
+    100% calc(100% - 4px), calc(100% - 4px) 100%,
+    4px 100%, 0 calc(100% - 4px)
+  );
+  transition: opacity 0.15s;
+}
+.state-screen button:hover { opacity: 0.85; }
+
+.state-msg {
+  font-size: 12px;
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  color: var(--fn-text-sub);
+  text-transform: uppercase;
+}
+
+.hidden { display: none !important; }
+
+/* Kill flash from real-time log */
+@keyframes killFlash {
+  0%   { transform: scale(1.4); color: #fff; text-shadow: 0 0 20px var(--fn-accent); }
+  100% { transform: scale(1);   color: var(--fn-accent); }
+}
+.kill-flash { animation: killFlash 0.8s ease-out forwards; }

@@ -1,0 +1,22 @@
+# Dependencies
+node_modules/
+
+# Environment variables (contains API keys — never commit this)
+.env
+
+# TypeScript build output
+dist/
+
+# Misc
+config.json
+*.js.map
+
+# OS junk
+.DS_Store
+Thumbs.db
+
+# Editor
+.vscode/
+.idea/
+*.swp
+*.swo

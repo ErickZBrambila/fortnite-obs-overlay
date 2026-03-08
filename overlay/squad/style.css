@@ -1,0 +1,204 @@
+@import url('https://fonts.googleapis.com/css2?family=Rajdhani:wght@500;600;700&display=swap');
+@import url('../shared/theme.css');
+
+body {
+  width: 421px; /* overridden by JS based on player count */
+  padding: 0;
+  user-select: none;
+}
+
+.squad-root {
+  width: 100%;
+}
+
+/* ─── Header ─────────────────────────────────────────────────────────────────*/
+.squad-header {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 4px 10px;
+  background: var(--fn-bg-header);
+  border-bottom: 1px solid var(--fn-accent-dim);
+}
+
+.squad-title {
+  font-size: 9px;
+  font-weight: 800;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--fn-text-sub);
+}
+
+.mode-badge {
+  font-size: 8px;
+  font-weight: 700;
+  letter-spacing: 0.1em;
+  color: var(--fn-gold);
+  background: rgba(255, 196, 0, 0.10);
+  border: 1px solid var(--fn-gold);
+  padding: 1px 4px;
+}
+
+.squad-timer {
+  margin-left: auto;
+  font-size: 10px;
+  font-weight: 600;
+  color: var(--fn-text-sub);
+  letter-spacing: 0.06em;
+}
+
+/* ─── Grid ───────────────────────────────────────────────────────────────────*/
+.squad-grid {
+  display: flex;
+  gap: 1px;
+  background: var(--fn-border); /* gap color */
+}
+
+/* ─── Player card ────────────────────────────────────────────────────────────*/
+.player-card {
+  flex: 1;
+  min-width: 0;
+  background: var(--fn-bg-panel);
+}
+
+.card-header {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  padding: 3px 7px;
+  background: var(--fn-bg-header);
+  border-bottom: 1px solid var(--fn-border);
+}
+
+.card-platform {
+  font-size: 8px;
+  font-weight: 800;
+  letter-spacing: 0.08em;
+  color: var(--fn-accent);
+  flex-shrink: 0;
+}
+
+.card-label {
+  font-size: 9px;
+  font-weight: 700;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  color: var(--fn-text-sub);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  flex: 1;
+}
+
+.card-level {
+  font-size: 8px;
+  font-weight: 700;
+  color: var(--fn-gold);
+  letter-spacing: 0.06em;
+  white-space: nowrap;
+  flex-shrink: 0;
+}
+
+.card-dot {
+  flex-shrink: 0;
+}
+
+.card-name {
+  font-size: 11px;
+  font-weight: 800;
+  letter-spacing: 0.05em;
+  color: var(--fn-text);
+  padding: 2px 7px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  border-bottom: 1px solid var(--fn-border);
+}
+
+/* ─── K/D strip ──────────────────────────────────────────────────────────────*/
+.kd-strip {
+  display: flex;
+  align-items: center;
+  justify-content: space-around;
+  padding: 6px 2px;
+  border-bottom: 1px solid var(--fn-border);
+}
+
+.kd-item {
+  text-align: center;
+  flex: 1;
+}
+
+.kd-sep {
+  width: 1px;
+  height: 28px;
+  background: var(--fn-border);
+}
+
+/* ─── Stat row ───────────────────────────────────────────────────────────────*/
+.stat-row {
+  display: grid;
+  grid-template-columns: 1fr 1fr 1fr;
+}
+
+.stat-item {
+  text-align: center;
+  padding: 4px 2px;
+  border-right: 1px solid var(--fn-border);
+}
+
+.stat-item:last-child {
+  border-right: none;
+}
+
+/* ─── Error ──────────────────────────────────────────────────────────────────*/
+.card-error {
+  font-size: 10px;
+  color: var(--fn-red);
+  text-align: center;
+  padding: 4px 8px;
+}
+
+/* ─── Footer ─────────────────────────────────────────────────────────────────*/
+.squad-footer {
+  padding: 3px 10px;
+  border-top: 1px solid var(--fn-border);
+  font-size: 9px;
+  color: var(--fn-text-muted);
+  text-align: right;
+  letter-spacing: 0.06em;
+}
+
+/* ─── Idle / loading state ───────────────────────────────────────────────────*/
+.state-screen {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 20px 16px;
+  gap: 6px;
+  min-height: 80px;
+}
+
+.state-msg {
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  color: var(--fn-text-sub);
+  text-transform: uppercase;
+}
+
+.state-sub {
+  font-size: 10px;
+  color: var(--fn-text-muted);
+  letter-spacing: 0.04em;
+}
+
+/* ─── Kill flash ─────────────────────────────────────────────────────────────*/
+@keyframes killFlash {
+  0%   { transform: scale(1.5); color: #fff; text-shadow: 0 0 20px var(--fn-accent); }
+  100% { transform: scale(1);   color: var(--fn-accent); }
+}
+.kill-flash { animation: killFlash 0.8s ease-out forwards; }
+
+.hidden { display: none !important; }

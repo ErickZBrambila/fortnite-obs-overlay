@@ -1,0 +1,99 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Fortnite Live Overlay</title>
+  <link rel="stylesheet" href="style.css" />
+</head>
+<!--
+  THEME: Change data-theme on <body> to switch themes.
+  Options: "fortnite" (default) | "minimal" | "neon"
+-->
+<body data-theme="fortnite">
+
+  <!-- ── Idle: enter player name ────────────────────────────────────────── -->
+  <div id="idleScreen" class="fn-panel overlay-root">
+    <div class="state-screen">
+      <span class="state-msg">Enter Epic Username</span>
+      <input id="usernameInput" type="text" placeholder="EPIC USERNAME" maxlength="32" autocomplete="off" spellcheck="false" />
+      <button id="startBtn">Track Player</button>
+    </div>
+  </div>
+
+  <!-- ── Loading ────────────────────────────────────────────────────────── -->
+  <div id="loadingScreen" class="fn-panel overlay-root hidden">
+    <div class="state-screen">
+      <div class="fn-dot loading"></div>
+      <span class="state-msg" id="loadingMsg">Loading...</span>
+    </div>
+  </div>
+
+  <!-- ── Error ──────────────────────────────────────────────────────────── -->
+  <div id="errorScreen" class="fn-panel overlay-root hidden">
+    <div class="state-screen">
+      <div class="fn-dot error"></div>
+      <span class="state-msg" id="errorMsg">Error</span>
+      <button id="retryBtn">Retry</button>
+    </div>
+  </div>
+
+  <!-- ── Live stats panel ───────────────────────────────────────────────── -->
+  <div id="statsPanel" class="fn-panel overlay-root hidden">
+
+    <div class="header">
+      <span class="player-name" id="playerName">—</span>
+      <span class="bp-level" id="bpLevel"></span>
+    </div>
+
+    <div class="session-label">
+      <div class="fn-dot live" id="statusDot"></div>
+      <span>Session Stats</span>
+      <span class="mode-badge hidden" id="modeBadge"></span>
+    </div>
+
+    <!-- K / D / K/D ratio -->
+    <div class="kd-row">
+      <div class="kd-block">
+        <div class="fn-label">Kills</div>
+        <div class="fn-value fn-value-lg fn-value-accent" id="sesKills">0</div>
+      </div>
+      <div class="kd-sep"></div>
+      <div class="kd-block">
+        <div class="fn-label">K/D</div>
+        <div class="fn-value fn-value-lg fn-value-gold" id="sesKD">0.00</div>
+      </div>
+      <div class="kd-sep"></div>
+      <div class="kd-block">
+        <div class="fn-label">Deaths</div>
+        <div class="fn-value fn-value-lg" id="sesDeaths">0</div>
+      </div>
+    </div>
+
+    <!-- Matches / Wins / Win% -->
+    <div class="stats-grid">
+      <div class="stat-cell">
+        <div class="fn-label">Matches</div>
+        <div class="fn-value" id="sesMatches">0</div>
+      </div>
+      <div class="stat-cell">
+        <div class="fn-label">Wins</div>
+        <div class="fn-value fn-value-gold" id="sesWins">0</div>
+      </div>
+      <div class="stat-cell">
+        <div class="fn-label">Win %</div>
+        <div class="fn-value" id="sesWinRate">0%</div>
+      </div>
+    </div>
+
+    <div class="footer">
+      <span class="fn-dot live"></span>
+      <span class="timer" id="sessionTimer">0:00:00</span>
+      <span class="last-updated" id="lastUpdated"></span>
+    </div>
+
+  </div>
+
+  <script src="overlay.js"></script>
+</body>
+</html>

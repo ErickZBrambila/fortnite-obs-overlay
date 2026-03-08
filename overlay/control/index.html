@@ -1,0 +1,631 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Fortnite Overlay — Control Panel</title>
+  <link href="https://fonts.googleapis.com/css2?family=Rajdhani:wght@500;600;700&display=swap" rel="stylesheet" />
+  <style>
+    :root {
+      --accent: #00c8ff;
+      --gold:   #ffd700;
+      --bg:     #090f1a;
+      --panel:  #0d1826;
+      --border: rgba(0,200,255,0.25);
+      --text:   #fff;
+      --sub:    #6a9db8;
+      --red:    #ff4c4c;
+      --green:  #44ff88;
+    }
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: 'Rajdhani', 'Arial Narrow', sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      min-height: 100vh;
+      display: flex;
+      align-items: flex-start;
+      justify-content: center;
+      padding: 40px 16px;
+    }
+    .card {
+      background: var(--panel);
+      border: 1px solid var(--border);
+      width: 100%;
+      max-width: 480px;
+      clip-path: polygon(0 10px,10px 0,calc(100% - 10px) 0,100% 10px,100% calc(100% - 10px),calc(100% - 10px) 100%,10px 100%,0 calc(100% - 10px));
+    }
+    .card-header {
+      background: rgba(0,60,100,0.65);
+      border-bottom: 1px solid var(--border);
+      padding: 12px 20px;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+    .card-header h1 {
+      font-size: 16px;
+      font-weight: 800;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+    }
+    .dot {
+      width: 8px; height: 8px;
+      border-radius: 50%;
+      background: var(--sub);
+      flex-shrink: 0;
+    }
+    .dot.live   { background: var(--green); box-shadow: 0 0 6px var(--green); }
+    .dot.error  { background: var(--red); }
+    .card-body { padding: 20px; display: flex; flex-direction: column; gap: 16px; }
+    label {
+      font-size: 11px;
+      font-weight: 700;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      color: var(--sub);
+      display: block;
+      margin-bottom: 5px;
+    }
+    input[type="text"],
+    input[type="password"],
+    input[type="number"] {
+      width: 100%;
+      background: rgba(0,0,0,0.4);
+      border: 1px solid var(--border);
+      color: var(--text);
+      font-family: inherit;
+      font-size: 16px;
+      font-weight: 600;
+      padding: 9px 12px;
+      outline: none;
+      letter-spacing: 0.04em;
+    }
+    input[type="text"] { text-transform: uppercase; }
+    input[type="text"].no-upper { text-transform: none; }
+    input[type="text"]:focus,
+    input[type="password"]:focus,
+    input[type="number"]:focus { border-color: var(--accent); box-shadow: 0 0 10px rgba(0,200,255,0.2); }
+    .input-row { display: flex; gap: 6px; align-items: stretch; }
+    .input-row input { flex: 1; }
+    .icon-btn {
+      background: rgba(0,200,255,0.08);
+      border: 1px solid var(--border);
+      color: var(--sub);
+      font-family: inherit;
+      font-size: 13px;
+      padding: 0 12px;
+      cursor: pointer;
+      clip-path: none;
+      flex: none;
+      transition: color 0.15s, border-color 0.15s;
+    }
+    .icon-btn:hover { color: var(--accent); border-color: var(--accent); opacity: 1; }
+    .api-key-status {
+      font-size: 11px;
+      font-weight: 700;
+      letter-spacing: 0.08em;
+      margin-top: 5px;
+    }
+    .api-key-status.ok     { color: var(--green); }
+    .api-key-status.missing { color: var(--red); }
+    .btn-row { display: flex; gap: 10px; }
+    button {
+      flex: 1;
+      background: var(--accent);
+      border: none;
+      color: #000;
+      font-family: inherit;
+      font-size: 13px;
+      font-weight: 800;
+      letter-spacing: 0.10em;
+      text-transform: uppercase;
+      padding: 10px;
+      cursor: pointer;
+      clip-path: polygon(0 4px,4px 0,calc(100% - 4px) 0,100% 4px,100% calc(100% - 4px),calc(100% - 4px) 100%,4px 100%,0 calc(100% - 4px));
+      transition: opacity 0.15s;
+    }
+    button:hover { opacity: 0.85; }
+    button.secondary { background: rgba(0,200,255,0.12); color: var(--accent); border: 1px solid var(--border); }
+    button.danger    { background: rgba(255,76,76,0.15);  color: var(--red);    border: 1px solid rgba(255,76,76,0.3); }
+    .divider { height: 1px; background: var(--border); }
+    .section-label {
+      font-size: 11px;
+      font-weight: 700;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      color: var(--sub);
+      margin-bottom: 10px;
+    }
+    .status-box {
+      background: rgba(0,0,0,0.3);
+      border: 1px solid var(--border);
+      padding: 12px 14px;
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+    }
+    .status-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      font-size: 13px;
+    }
+    .status-row .key { color: var(--sub); font-weight: 600; letter-spacing: 0.06em; }
+    .status-row .val { font-weight: 700; color: var(--text); }
+    .toast {
+      padding: 8px 14px;
+      font-size: 12px;
+      font-weight: 700;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      text-align: center;
+      display: none;
+    }
+    .toast.success { color: var(--green); }
+    .toast.error   { color: var(--red); }
+    .links { padding: 10px 20px 16px; display: flex; gap: 10px; flex-wrap: wrap; }
+    .link-btn {
+      font-size: 11px;
+      font-weight: 700;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      color: var(--sub);
+      text-decoration: none;
+      padding: 5px 10px;
+      border: 1px solid var(--border);
+      transition: color 0.15s, border-color 0.15s;
+    }
+    .link-btn:hover { color: var(--accent); border-color: var(--accent); }
+
+    /* ── Theme picker ───────────────────────────────────────────────────────── */
+    .theme-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 6px;
+    }
+    .theme-btn {
+      flex: unset;
+      background: rgba(0,0,0,0.3);
+      border: 1px solid var(--border);
+      color: var(--sub);
+      font-family: inherit;
+      font-size: 11px;
+      font-weight: 700;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      padding: 8px 4px;
+      cursor: pointer;
+      clip-path: polygon(0 3px,3px 0,calc(100% - 3px) 0,100% 3px,100% calc(100% - 3px),calc(100% - 3px) 100%,3px 100%,0 calc(100% - 3px));
+      transition: color 0.15s, border-color 0.15s;
+    }
+    .theme-btn:hover { color: var(--accent); border-color: var(--accent); opacity: 1; }
+    .theme-btn.active { color: var(--gold); border-color: var(--gold); background: rgba(255,215,0,0.08); }
+
+    /* ── Squad player rows ──────────────────────────────────────────────────── */
+    .squad-row {
+      display: grid;
+      grid-template-columns: 1fr 1fr auto auto;
+      gap: 4px;
+      margin-bottom: 5px;
+      align-items: center;
+    }
+    .squad-row input { font-size: 13px; padding: 7px 8px; }
+    .squad-row select {
+      background: rgba(0,0,0,0.4);
+      border: 1px solid var(--border);
+      color: var(--text);
+      font-family: inherit;
+      font-size: 13px;
+      font-weight: 600;
+      padding: 7px 6px;
+      outline: none;
+      letter-spacing: 0.04em;
+    }
+    .squad-row select:focus { border-color: var(--accent); }
+    .remove-btn {
+      flex: none;
+      background: rgba(255,76,76,0.10);
+      border: 1px solid rgba(255,76,76,0.3);
+      color: var(--red);
+      font-family: inherit;
+      font-size: 13px;
+      padding: 6px 10px;
+      cursor: pointer;
+      clip-path: none;
+    }
+    .remove-btn:hover { background: rgba(255,76,76,0.2); opacity: 1; }
+    .squad-hint {
+      font-size: 10px;
+      color: var(--sub);
+      margin-top: 4px;
+      letter-spacing: 0.04em;
+    }
+  </style>
+</head>
+<body>
+  <div class="card">
+    <div class="card-header">
+      <div class="dot" id="wsDot"></div>
+      <h1>Overlay Control Panel</h1>
+    </div>
+
+    <div class="card-body">
+
+      <!-- ── Player input ──────────────────────────────────────────────────── -->
+      <div>
+        <label for="usernameInput">Epic Username (Single Player)</label>
+        <input id="usernameInput" type="text" placeholder="Enter Epic username" maxlength="32" autocomplete="off" spellcheck="false" />
+      </div>
+      <div class="btn-row">
+        <button id="trackBtn">Track Player</button>
+        <button class="secondary" id="refreshBtn">Refresh Now</button>
+      </div>
+
+      <div class="divider"></div>
+
+      <!-- ── Session controls ─────────────────────────────────────────────── -->
+      <div>
+        <label>Session Controls</label>
+        <div class="btn-row">
+          <button class="danger" id="resetBtn">Reset Session</button>
+        </div>
+      </div>
+
+      <div class="divider"></div>
+
+      <!-- ── Theme picker ──────────────────────────────────────────────────── -->
+      <div>
+        <label>Overlay Theme</label>
+        <div class="theme-grid" id="themeGrid">
+          <button class="theme-btn" data-theme="fortnite">Fortnite</button>
+          <button class="theme-btn" data-theme="minimal">Minimal</button>
+          <button class="theme-btn" data-theme="neon">Neon</button>
+          <button class="theme-btn" data-theme="dark">Dark</button>
+          <button class="theme-btn" data-theme="gold">Gold</button>
+          <button class="theme-btn" data-theme="purple">Purple</button>
+        </div>
+      </div>
+
+      <div class="divider"></div>
+
+      <!-- ── Squad players ─────────────────────────────────────────────────── -->
+      <div>
+        <label>Squad Players (max 4)</label>
+        <div id="squadList"></div>
+        <div class="squad-hint">Used by the Squad overlay. Each player is polled separately.</div>
+        <div class="btn-row" style="margin-top:10px;">
+          <button class="secondary" id="addSquadBtn">+ Add Player</button>
+          <button id="saveSquadBtn">Save Squad</button>
+        </div>
+      </div>
+
+      <div class="divider"></div>
+
+      <!-- ── API Configuration ─────────────────────────────────────────────── -->
+      <div>
+        <label>API Configuration</label>
+
+        <label for="apiKeyInput" style="margin-top:10px;">Fortnite API Key</label>
+        <div class="input-row">
+          <input id="apiKeyInput" type="password" placeholder="Paste your API key" autocomplete="off" spellcheck="false" />
+          <button class="icon-btn" id="toggleKeyBtn" title="Show/hide key">Show</button>
+        </div>
+        <div class="api-key-status" id="apiKeyStatus"></div>
+
+        <label for="pollInput" style="margin-top:12px;">Poll Interval (seconds)</label>
+        <input id="pollInput" type="number" min="10" max="300" step="5" placeholder="30" />
+
+        <label for="logPathInput" style="margin-top:12px;">Fortnite Log File Path (PC only)</label>
+        <div class="input-row">
+          <input id="logPathInput" type="text" class="no-upper" placeholder="C:\Users\You\AppData\Local\FortniteGame\Saved\Logs\FortniteGame.log" />
+          <button class="icon-btn" id="saveLogBtn">Save</button>
+        </div>
+
+        <div class="btn-row" style="margin-top:10px;">
+          <button id="saveConfigBtn">Save API Config</button>
+        </div>
+      </div>
+
+      <div class="divider"></div>
+
+      <!-- ── Status ────────────────────────────────────────────────────────── -->
+      <div>
+        <label>Server Status</label>
+        <div class="status-box">
+          <div class="status-row">
+            <span class="key">Connection</span>
+            <span class="val" id="statusConn">—</span>
+          </div>
+          <div class="status-row">
+            <span class="key">Active Player</span>
+            <span class="val" id="statusPlayer">—</span>
+          </div>
+          <div class="status-row">
+            <span class="key">Poll Interval</span>
+            <span class="val" id="statusPoll">—</span>
+          </div>
+          <div class="status-row">
+            <span class="key">Theme</span>
+            <span class="val" id="statusTheme">—</span>
+          </div>
+          <div class="status-row">
+            <span class="key">Log Watcher</span>
+            <span class="val" id="statusLog">—</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="toast" id="toast"></div>
+    </div>
+
+    <div class="links">
+      <a class="link-btn" href="/live/"     target="_blank">Live Overlay</a>
+      <a class="link-btn" href="/overview/" target="_blank">Overview Overlay</a>
+      <a class="link-btn" href="/squad/"    target="_blank">Squad Overlay</a>
+    </div>
+  </div>
+
+  <script>
+    const WS_URL = `ws://${location.host}`;
+    let ws = null;
+    let squadPlayers = [];
+    let activeTheme = 'fortnite';
+
+    const $ = (id) => document.getElementById(id);
+    const wsDot = $('wsDot');
+
+    // ── Toast ───────────────────────────────────────────────────────────────────
+    function showToast(msg, type = 'success') {
+      const t = $('toast');
+      t.textContent = msg;
+      t.className = `toast ${type}`;
+      t.style.display = 'block';
+      setTimeout(() => { t.style.display = 'none'; }, 3000);
+    }
+
+    function send(obj) {
+      if (ws?.readyState === WebSocket.OPEN) ws.send(JSON.stringify(obj));
+    }
+
+    // ── Status + Config load ────────────────────────────────────────────────────
+    function loadStatus() {
+      fetch('/api/status')
+        .then(r => r.json())
+        .then(d => {
+          $('statusPlayer').textContent = d.player || 'None';
+          $('statusPoll').textContent   = d.pollIntervalMs ? `${d.pollIntervalMs / 1000}s` : '—';
+        })
+        .catch(() => {});
+    }
+
+    function loadConfig() {
+      fetch('/api/config')
+        .then(r => r.json())
+        .then(d => {
+          $('apiKeyInput').value = d.apiKey || '';
+          $('pollInput').value   = d.pollIntervalMs ? d.pollIntervalMs / 1000 : 30;
+          $('logPathInput').value = d.logFilePath || '';
+          updateApiKeyStatus(d.apiKey);
+          setActiveTheme(d.activeTheme || 'fortnite');
+          $('statusLog').textContent = d.logFilePath ? 'Active' : 'Not configured';
+        })
+        .catch(() => {});
+    }
+
+    function loadSquad() {
+      fetch('/api/squad')
+        .then(r => r.json())
+        .then(d => {
+          squadPlayers = d.players || [];
+          renderSquadList();
+        })
+        .catch(() => {});
+    }
+
+    function updateApiKeyStatus(key) {
+      const el = $('apiKeyStatus');
+      if (key && key.trim()) {
+        el.textContent = 'API key is set';
+        el.className = 'api-key-status ok';
+      } else {
+        el.textContent = 'API key is not set — stats will not load';
+        el.className = 'api-key-status missing';
+      }
+    }
+
+    // ── Theme picker ────────────────────────────────────────────────────────────
+    function setActiveTheme(theme) {
+      activeTheme = theme;
+      document.querySelectorAll('.theme-btn').forEach(btn => {
+        btn.classList.toggle('active', btn.dataset.theme === theme);
+      });
+      $('statusTheme').textContent = theme.charAt(0).toUpperCase() + theme.slice(1);
+    }
+
+    document.querySelectorAll('.theme-btn').forEach(btn => {
+      btn.addEventListener('click', () => {
+        const theme = btn.dataset.theme;
+        send({ type: 'set_theme', theme });
+        setActiveTheme(theme);
+        showToast(`Theme: ${theme}`);
+      });
+    });
+
+    // ── Squad management ────────────────────────────────────────────────────────
+    function renderSquadList() {
+      const list = $('squadList');
+      list.innerHTML = '';
+      if (squadPlayers.length === 0) {
+        list.innerHTML = '<div class="squad-hint" style="padding:8px 0;">No squad players configured.</div>';
+        return;
+      }
+      squadPlayers.forEach((p, i) => {
+        const row = document.createElement('div');
+        row.className = 'squad-row';
+        row.innerHTML = `
+          <input type="text" class="squad-username" placeholder="EPIC USERNAME"
+                 value="${p.username || ''}" maxlength="32" />
+          <input type="text" class="squad-label no-upper" placeholder="Label e.g. Dad"
+                 value="${p.label || ''}" maxlength="20" style="text-transform:none;" />
+          <select class="squad-platform">
+            ${['pc','ps5','xbox','switch','mobile'].map(pl =>
+              `<option value="${pl}"${p.platform === pl ? ' selected' : ''}>${pl.toUpperCase()}</option>`
+            ).join('')}
+          </select>
+          <button class="remove-btn" data-index="${i}">✕</button>
+        `;
+        row.querySelector('.remove-btn').addEventListener('click', () => {
+          squadPlayers.splice(i, 1);
+          renderSquadList();
+        });
+        list.appendChild(row);
+      });
+    }
+
+    $('addSquadBtn').addEventListener('click', () => {
+      if (squadPlayers.length >= 4) { showToast('Max 4 players', 'error'); return; }
+      squadPlayers.push({ username: '', label: '', platform: 'pc', enabled: true });
+      renderSquadList();
+    });
+
+    $('saveSquadBtn').addEventListener('click', () => {
+      const rows = document.querySelectorAll('.squad-row');
+      const players = Array.from(rows).map(row => ({
+        username: row.querySelector('.squad-username').value.trim(),
+        label:    row.querySelector('.squad-label').value.trim(),
+        platform: row.querySelector('.squad-platform').value,
+        enabled:  true,
+      })).filter(p => p.username);
+
+      fetch('/api/squad', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ players }),
+      })
+        .then(r => r.json())
+        .then(d => {
+          if (d.ok) { squadPlayers = players; showToast('Squad saved'); }
+          else showToast(d.error || 'Save failed', 'error');
+        })
+        .catch(() => showToast('Save failed', 'error'));
+    });
+
+    // ── Log path ─────────────────────────────────────────────────────────────────
+    $('saveLogBtn').addEventListener('click', () => {
+      const logFilePath = $('logPathInput').value.trim();
+      fetch('/api/config', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ logFilePath }),
+      })
+        .then(r => r.json())
+        .then(d => {
+          if (d.ok) {
+            $('statusLog').textContent = logFilePath ? 'Active' : 'Not configured';
+            showToast(logFilePath ? 'Log watcher started' : 'Log watcher stopped');
+          } else {
+            showToast(d.error || 'Save failed', 'error');
+          }
+        })
+        .catch(() => showToast('Save failed', 'error'));
+    });
+
+    // ── WebSocket ─────────────────────────────────────────────────────────────────
+    function connect() {
+      ws = new WebSocket(WS_URL);
+
+      ws.addEventListener('open', () => {
+        wsDot.className = 'dot live';
+        $('statusConn').textContent = 'Connected';
+        loadStatus();
+        loadConfig();
+        loadSquad();
+      });
+
+      ws.addEventListener('message', (evt) => {
+        let msg;
+        try { msg = JSON.parse(evt.data); } catch { return; }
+
+        if (msg.type === 'stats_update') {
+          $('statusPlayer').textContent = msg.player ?? '—';
+        }
+        if (msg.type === 'theme_change') {
+          setActiveTheme(msg.theme);
+        }
+        if (msg.type === 'error') {
+          showToast(msg.message, 'error');
+        }
+      });
+
+      ws.addEventListener('close', () => {
+        wsDot.className = 'dot error';
+        $('statusConn').textContent = 'Disconnected';
+        setTimeout(connect, 3000);
+      });
+
+      ws.addEventListener('error', () => ws.close());
+    }
+
+    // ── Player tracking ───────────────────────────────────────────────────────────
+    $('trackBtn').addEventListener('click', () => {
+      const username = $('usernameInput').value.trim();
+      if (!username) return;
+      send({ type: 'set_player', username });
+      $('statusPlayer').textContent = username;
+      showToast(`Tracking ${username}`);
+    });
+
+    $('usernameInput').addEventListener('keydown', (e) => {
+      if (e.key === 'Enter') $('trackBtn').click();
+    });
+
+    $('refreshBtn').addEventListener('click', () => {
+      send({ type: 'refresh' });
+      showToast('Refreshing stats…');
+    });
+
+    $('resetBtn').addEventListener('click', () => {
+      send({ type: 'reset_session' });
+      showToast('Session reset');
+    });
+
+    // ── API config ────────────────────────────────────────────────────────────────
+    $('toggleKeyBtn').addEventListener('click', () => {
+      const input = $('apiKeyInput');
+      const isHidden = input.type === 'password';
+      input.type = isHidden ? 'text' : 'password';
+      $('toggleKeyBtn').textContent = isHidden ? 'Hide' : 'Show';
+    });
+
+    $('saveConfigBtn').addEventListener('click', () => {
+      const apiKey   = $('apiKeyInput').value.trim();
+      const pollSecs = parseFloat($('pollInput').value);
+
+      if (isNaN(pollSecs) || pollSecs < 10) {
+        showToast('Poll interval must be >= 10s', 'error');
+        return;
+      }
+
+      fetch('/api/config', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ apiKey, pollIntervalMs: pollSecs * 1000 }),
+      })
+        .then(r => r.json())
+        .then(d => {
+          if (d.ok) {
+            updateApiKeyStatus(apiKey);
+            $('statusPoll').textContent = `${pollSecs}s`;
+            showToast('Config saved');
+          } else {
+            showToast(d.error || 'Save failed', 'error');
+          }
+        })
+        .catch(() => showToast('Save failed', 'error'));
+    });
+
+    connect();
+  </script>
+</body>
+</html>

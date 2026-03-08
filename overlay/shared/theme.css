@@ -1,0 +1,235 @@
+/* ─── Fortnite Native Theme (default) ─────────────────────────────────────── */
+:root,
+[data-theme="fortnite"] {
+  --fn-bg:             rgba(8, 15, 26, 0.90);
+  --fn-bg-panel:       rgba(12, 22, 40, 0.93);
+  --fn-bg-header:      rgba(0, 60, 100, 0.70);
+  --fn-bg-row-alt:     rgba(0, 200, 255, 0.04);
+
+  --fn-accent:         #00c8ff;
+  --fn-accent-dim:     rgba(0, 200, 255, 0.35);
+  --fn-accent-glow:    rgba(0, 200, 255, 0.18);
+  --fn-gold:           #ffd700;
+  --fn-gold-dim:       rgba(255, 215, 0, 0.25);
+  --fn-red:            #ff4c4c;
+
+  --fn-text:           #ffffff;
+  --fn-text-sub:       #7eb8d4;
+  --fn-text-muted:     #3d6070;
+
+  --fn-border:         rgba(0, 200, 255, 0.30);
+  --fn-border-gold:    rgba(255, 215, 0, 0.50);
+  --fn-corner:         8px;
+
+  --fn-font:           'Rajdhani', 'Barlow Condensed', 'Arial Narrow', sans-serif;
+}
+
+/* ─── Minimal dark theme ───────────────────────────────────────────────────── */
+[data-theme="minimal"] {
+  --fn-bg:             rgba(10, 10, 10, 0.88);
+  --fn-bg-panel:       rgba(18, 18, 18, 0.92);
+  --fn-bg-header:      rgba(30, 30, 30, 0.80);
+  --fn-bg-row-alt:     rgba(255, 255, 255, 0.03);
+
+  --fn-accent:         #e0e0e0;
+  --fn-accent-dim:     rgba(224, 224, 224, 0.25);
+  --fn-accent-glow:    rgba(224, 224, 224, 0.08);
+  --fn-gold:           #c8a951;
+  --fn-gold-dim:       rgba(200, 169, 81, 0.20);
+  --fn-red:            #e05555;
+
+  --fn-text:           #f0f0f0;
+  --fn-text-sub:       #888888;
+  --fn-text-muted:     #444444;
+
+  --fn-border:         rgba(255, 255, 255, 0.12);
+  --fn-border-gold:    rgba(200, 169, 81, 0.40);
+  --fn-corner:         4px;
+}
+
+/* ─── Neon theme ───────────────────────────────────────────────────────────── */
+[data-theme="neon"] {
+  --fn-bg:             rgba(5, 0, 20, 0.92);
+  --fn-bg-panel:       rgba(10, 0, 35, 0.94);
+  --fn-bg-header:      rgba(80, 0, 120, 0.55);
+  --fn-bg-row-alt:     rgba(180, 0, 255, 0.05);
+
+  --fn-accent:         #bf00ff;
+  --fn-accent-dim:     rgba(191, 0, 255, 0.35);
+  --fn-accent-glow:    rgba(191, 0, 255, 0.20);
+  --fn-gold:           #00ffcc;
+  --fn-gold-dim:       rgba(0, 255, 204, 0.20);
+  --fn-red:            #ff0066;
+
+  --fn-text:           #ffffff;
+  --fn-text-sub:       #cc88ff;
+  --fn-text-muted:     #5a2080;
+
+  --fn-border:         rgba(191, 0, 255, 0.40);
+  --fn-border-gold:    rgba(0, 255, 204, 0.45);
+  --fn-corner:         2px;
+}
+
+/* ─── Dark theme ───────────────────────────────────────────────────────────── */
+[data-theme="dark"] {
+  --fn-bg:             rgba(0, 0, 0, 0.92);
+  --fn-bg-panel:       rgba(8, 8, 12, 0.95);
+  --fn-bg-header:      rgba(20, 20, 28, 0.85);
+  --fn-bg-row-alt:     rgba(255, 255, 255, 0.02);
+
+  --fn-accent:         #a0a0b8;
+  --fn-accent-dim:     rgba(160, 160, 184, 0.30);
+  --fn-accent-glow:    rgba(160, 160, 184, 0.10);
+  --fn-gold:           #c8a951;
+  --fn-gold-dim:       rgba(200, 169, 81, 0.22);
+  --fn-red:            #cc3333;
+
+  --fn-text:           #e8e8e8;
+  --fn-text-sub:       #606070;
+  --fn-text-muted:     #303038;
+
+  --fn-border:         rgba(255, 255, 255, 0.08);
+  --fn-border-gold:    rgba(200, 169, 81, 0.35);
+  --fn-corner:         0px;
+
+  --fn-font:           'Rajdhani', 'Barlow Condensed', 'Arial Narrow', sans-serif;
+}
+
+/* ─── Gold / Victory Royale theme ─────────────────────────────────────────── */
+[data-theme="gold"] {
+  --fn-bg:             rgba(10, 7, 2, 0.92);
+  --fn-bg-panel:       rgba(18, 12, 3, 0.95);
+  --fn-bg-header:      rgba(80, 55, 0, 0.60);
+  --fn-bg-row-alt:     rgba(255, 200, 0, 0.04);
+
+  --fn-accent:         #ffd700;
+  --fn-accent-dim:     rgba(255, 215, 0, 0.35);
+  --fn-accent-glow:    rgba(255, 215, 0, 0.20);
+  --fn-gold:           #ffec6e;
+  --fn-gold-dim:       rgba(255, 236, 110, 0.25);
+  --fn-red:            #ff6633;
+
+  --fn-text:           #fff8e0;
+  --fn-text-sub:       #c8a030;
+  --fn-text-muted:     #5a4400;
+
+  --fn-border:         rgba(255, 215, 0, 0.28);
+  --fn-border-gold:    rgba(255, 215, 0, 0.60);
+  --fn-corner:         6px;
+
+  --fn-font:           'Rajdhani', 'Barlow Condensed', 'Arial Narrow', sans-serif;
+}
+
+/* ─── Purple / Royal theme ─────────────────────────────────────────────────── */
+[data-theme="purple"] {
+  --fn-bg:             rgba(6, 2, 14, 0.92);
+  --fn-bg-panel:       rgba(12, 5, 28, 0.95);
+  --fn-bg-header:      rgba(45, 0, 90, 0.65);
+  --fn-bg-row-alt:     rgba(120, 40, 255, 0.05);
+
+  --fn-accent:         #8855ff;
+  --fn-accent-dim:     rgba(136, 85, 255, 0.35);
+  --fn-accent-glow:    rgba(136, 85, 255, 0.18);
+  --fn-gold:           #e040fb;
+  --fn-gold-dim:       rgba(224, 64, 251, 0.22);
+  --fn-red:            #ff2255;
+
+  --fn-text:           #f0eaff;
+  --fn-text-sub:       #9966dd;
+  --fn-text-muted:     #3d1a6a;
+
+  --fn-border:         rgba(136, 85, 255, 0.30);
+  --fn-border-gold:    rgba(224, 64, 251, 0.45);
+  --fn-corner:         12px;
+
+  --fn-font:           'Rajdhani', 'Barlow Condensed', 'Arial Narrow', sans-serif;
+}
+
+/* ─── Shared resets & base ─────────────────────────────────────────────────── */
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+body {
+  font-family: var(--fn-font);
+  background: transparent;
+  color: var(--fn-text);
+  -webkit-font-smoothing: antialiased;
+  letter-spacing: 0.02em;
+}
+
+/* ─── Panel with angled corners ────────────────────────────────────────────── */
+.fn-panel {
+  background: var(--fn-bg-panel);
+  border: 1px solid var(--fn-border);
+  clip-path: polygon(
+    0 var(--fn-corner),
+    var(--fn-corner) 0,
+    calc(100% - var(--fn-corner)) 0,
+    100% var(--fn-corner),
+    100% calc(100% - var(--fn-corner)),
+    calc(100% - var(--fn-corner)) 100%,
+    var(--fn-corner) 100%,
+    0 calc(100% - var(--fn-corner))
+  );
+}
+
+.fn-header {
+  background: var(--fn-bg-header);
+  border-bottom: 1px solid var(--fn-accent-dim);
+  padding: 6px 14px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.fn-label {
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--fn-text-sub);
+}
+
+.fn-value {
+  font-size: 22px;
+  font-weight: 700;
+  color: var(--fn-text);
+  line-height: 1;
+}
+
+.fn-value-lg {
+  font-size: 32px;
+  font-weight: 800;
+}
+
+.fn-value-gold {
+  color: var(--fn-gold);
+  text-shadow: 0 0 10px var(--fn-gold-dim);
+}
+
+.fn-value-accent {
+  color: var(--fn-accent);
+  text-shadow: 0 0 10px var(--fn-accent-glow);
+}
+
+.fn-divider {
+  height: 1px;
+  background: var(--fn-border);
+  margin: 0;
+}
+
+/* ─── Status dot ───────────────────────────────────────────────────────────── */
+.fn-dot {
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: var(--fn-text-muted);
+  flex-shrink: 0;
+}
+.fn-dot.live { background: #44ff88; box-shadow: 0 0 6px #44ff88; }
+.fn-dot.loading { background: var(--fn-gold); animation: pulse 1s infinite; }
+.fn-dot.error { background: var(--fn-red); }
+
+@keyframes pulse {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.3; }
+}
