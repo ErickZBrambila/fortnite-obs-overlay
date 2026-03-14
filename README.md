@@ -237,6 +237,7 @@ Set via the control panel or by editing `data-theme` on `<body>` in any overlay 
 | `gold` | Victory Royale gold |
 | `purple` | Royal purple |
 | `glass` | Frosted glass, semi-transparent |
+| `liquid` | iOS 26 Liquid Glass — heavy blur, specular highlights, deep shadow |
 
 To add a custom theme, add a `[data-theme="yourtheme"]` block to `overlay/shared/theme.css` and override the CSS custom properties.
 
