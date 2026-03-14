@@ -41,7 +41,7 @@ function broadcastLogSquadStats() {
   broadcast({ type: 'log_squad_stats', stats });
 }
 
-const VALID_THEMES = ['fortnite', 'minimal', 'neon', 'dark', 'gold', 'purple', 'glass'];
+const VALID_THEMES = ['fortnite', 'minimal', 'neon', 'dark', 'gold', 'purple', 'glass', 'liquid'];
 
 // ─── Broadcast ───────────────────────────────────────────────────────────────
 

@@ -61,4 +61,4 @@ Each overlay in `overlay/<name>/` is standalone HTML+CSS+JS with no build step. 
 
 ### Valid themes
 
-`fortnite` (default), `minimal`, `neon`, `dark`, `gold`, `purple`, `glass` — defined as `[data-theme="..."]` blocks in `overlay/shared/theme.css` using CSS custom properties.
+`fortnite` (default), `minimal`, `neon`, `dark`, `gold`, `purple`, `glass`, `liquid` — defined as `[data-theme="..."]` blocks in `overlay/shared/theme.css` using CSS custom properties.

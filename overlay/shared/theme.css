@@ -191,6 +191,63 @@
   text-shadow: 0 0 12px rgba(168, 216, 255, 0.50);
 }
 
+/* ─── Liquid Glass theme (iOS 26 inspired) ─────────────────────────────────── */
+[data-theme="liquid"] {
+  --fn-bg:             rgba(255, 255, 255, 0.05);
+  --fn-bg-panel:       rgba(255, 255, 255, 0.08);
+  --fn-bg-header:      rgba(255, 255, 255, 0.16);
+  --fn-bg-row-alt:     rgba(255, 255, 255, 0.04);
+
+  --fn-accent:         rgba(255, 255, 255, 0.95);
+  --fn-accent-dim:     rgba(255, 255, 255, 0.22);
+  --fn-accent-glow:    rgba(255, 255, 255, 0.18);
+  --fn-gold:           #ffd580;
+  --fn-gold-dim:       rgba(255, 213, 128, 0.30);
+  --fn-red:            #ff6b6b;
+
+  --fn-text:           #ffffff;
+  --fn-text-sub:       rgba(255, 255, 255, 0.62);
+  --fn-text-muted:     rgba(255, 255, 255, 0.32);
+
+  --fn-border:         rgba(255, 255, 255, 0.16);
+  --fn-border-gold:    rgba(255, 213, 128, 0.38);
+  --fn-corner:         0px; /* disabled — using border-radius instead */
+
+  --fn-font:           'SF Pro Display', 'Inter', system-ui, sans-serif;
+}
+
+/* Liquid glass panel — heavy blur, specular top highlight, deep shadow */
+[data-theme="liquid"] .fn-panel {
+  backdrop-filter: blur(48px) saturate(220%) brightness(1.08);
+  -webkit-backdrop-filter: blur(48px) saturate(220%) brightness(1.08);
+  border-radius: 22px;
+  clip-path: none;
+  border: 1px solid rgba(255, 255, 255, 0.20);
+  box-shadow:
+    inset 0 1.5px 0 rgba(255, 255, 255, 0.50),  /* specular top edge */
+    inset 0 -1px 0 rgba(0, 0, 0, 0.12),          /* bottom depth edge */
+    inset 1px 0 0 rgba(255, 255, 255, 0.14),     /* left specular */
+    0 24px 64px rgba(0, 0, 0, 0.22),             /* deep outer shadow */
+    0 4px 12px rgba(0, 0, 0, 0.14);             /* close shadow */
+  overflow: hidden;
+}
+
+[data-theme="liquid"] .fn-header {
+  border-radius: 22px 22px 0 0;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.12);
+  backdrop-filter: blur(24px) saturate(180%);
+  -webkit-backdrop-filter: blur(24px) saturate(180%);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.30);
+}
+
+[data-theme="liquid"] .fn-value-gold {
+  text-shadow: 0 0 24px rgba(255, 213, 128, 0.65);
+}
+
+[data-theme="liquid"] .fn-value-accent {
+  text-shadow: 0 0 18px rgba(255, 255, 255, 0.55);
+}
+
 /* ─── Shared resets & base ─────────────────────────────────────────────────── */
 *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
