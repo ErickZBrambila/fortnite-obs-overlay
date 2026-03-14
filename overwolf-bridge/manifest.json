@@ -1,0 +1,32 @@
+{
+  "manifest_version": 1,
+  "type": "WebApp",
+  "meta": {
+    "name": "Fortnite OBS Bridge",
+    "version": "1.0.0",
+    "minimum-overwolf-version": "0.220.0",
+    "author": "Out4blood04",
+    "description": "Bridges Overwolf GEP real-time events to the local OBS overlay server",
+    "icon": "icon.png",
+    "icon_gray": "icon.png"
+  },
+  "permissions": ["GameEventsProvider", "Extensions"],
+  "data": {
+    "start_window": "background",
+    "windows": {
+      "background": {
+        "file": "background.html",
+        "is_background_page": true,
+        "stay_hidden": true
+      }
+    },
+    "game_events": [21216],
+    "launch_events": [
+      {
+        "event": "GameLaunch",
+        "tracked_games": [21216],
+        "start_minimized": true
+      }
+    ]
+  }
+}

@@ -2,30 +2,41 @@ import { EventEmitter } from 'events';
 import fs from 'fs';
 import readline from 'readline';
 
-export interface KillEvent {
-  victim: string;
-  weapon: string;
-  timestamp: string;
-}
+// ─── Event interfaces ─────────────────────────────────────────────────────────
 
 export interface MatchStartEvent {
   gameMode: string;
+  playlist: string;
   timestamp: string;
 }
 
 export interface MatchEndEvent {
-  placement: number;
-  totalPlayers: number;
   timestamp: string;
 }
 
-export interface DownedEvent {
-  killer: string;
-  weapon: string;
+/** Best-effort local player kill — derived from KillScore monotonic increments */
+export interface LocalKillEvent {
+  score: number;      // cumulative kill count this match
   timestamp: string;
 }
 
-// FortniteGame.log timestamp: [2024.01.15-18.32.41:123]
+export interface LocalDeathEvent {
+  timestamp: string;
+}
+
+export interface PartyUpdateEvent {
+  players: string[];  // all current party members including local player
+  timestamp: string;
+}
+
+export interface PlaylistChangeEvent {
+  playlist: string;
+  timestamp: string;
+}
+
+// ─── Timestamp parsing ────────────────────────────────────────────────────────
+
+// [2024.01.15-18.32.41:123]
 const LOG_TS = /^\[(\d{4})\.(\d{2})\.(\d{2})-(\d{2})\.(\d{2})\.(\d{2}):\d{3}\]/;
 
 function parseTimestamp(line: string): string {
@@ -34,47 +45,44 @@ function parseTimestamp(line: string): string {
   return new Date(`${m[1]}-${m[2]}-${m[3]}T${m[4]}:${m[5]}:${m[6]}Z`).toISOString();
 }
 
-// ─── Kill patterns (tried in order, multiple Fortnite version formats) ────────
-const KILL_PATTERNS: RegExp[] = [
-  // Structured: KillerName=X ... VictimName=Y ... WeaponType=Z
-  /KillerName[=: ]+([A-Za-z0-9_.\-]{3,}).*?(?:VictimName|KilledName)[=: ]+([A-Za-z0-9_.\-]{3,}).*?(?:WeaponType|Weapon)[=: ]+([A-Za-z0-9_.\-]+)/i,
-  // "X killed Y with Z"
-  /LogFort[^:]*:\s*([A-Za-z0-9_.\-]{3,})\s+killed\s+([A-Za-z0-9_.\-]{3,})\s+with\s+([A-Za-z0-9_.\- ]+)/i,
-  // "X eliminated Y"
-  /LogAthena[^:]*:\s*([A-Za-z0-9_.\-]{3,})\s+eliminated\s+([A-Za-z0-9_.\-]{3,})/i,
-  // Elimination event with victim only
-  /Elimination.*?Victim[=: ]+([A-Za-z0-9_.\-]{3,}).*?(?:Weapon|WeaponType)[=: ]+([A-Za-z0-9_.\-]+)/i,
-];
+// ─── Confirmed Fortnite Chapter 6 log patterns ────────────────────────────────
 
-// ─── Match state ──────────────────────────────────────────────────────────────
-const MATCH_START = /WaitingToStart.*InProgress|BroadcastMatchStateChange.*InProgress/i;
-const MATCH_END   = /InProgress.*WaitingPostMatch|FinishingMatch|AthenaEndGame/i;
+const P_MATCH_START = /LogGameState: Match State Changed from WaitingToStart to InProgress/;
+const P_MATCH_END   = /Log(?:GameState|GameMode.*Display): Match State Changed from \w+ to LeavingMap/;
+const P_LOGIN       = /process_user_login.*DisplayName=\[([^\]]+)\]/;
+const P_PARTY_ADD   = /New party member state for \[([^\]]+)\]/;
+const P_PLAYLIST    = /PLAYLIST: Playlist Object finished loading.*PlaylistName is ([\w_]+)/;
+const P_KILL_SCORE  = /AFortPlayerStateAthena::OnRep_Kills\(\) \(KillScore = (\d+)\)/;
+const P_DEATH_LOCAL = /LogSpectateAfterDeathViewTarget.*\[([^\]]+)\]\s+No teammates/;
 
-// ─── Placement ────────────────────────────────────────────────────────────────
-const PLACEMENT_PATTERNS: RegExp[] = [
-  /Place[d]?\s*=\s*(\d+)[,\s]+(?:NumPlayers|Total)\s*=\s*(\d+)/i,
-  /placed\s*#?(\d+)\s*(?:\/|of|out of)\s*(\d+)/i,
-  /Victory.*?#(\d+)\s*\/\s*(\d+)/i,
-  /rank[=: ]+(\d+)[,\s]+total[=: ]+(\d+)/i,
-];
+// ─── Playlist → game mode mapping ─────────────────────────────────────────────
 
-// ─── Game mode ────────────────────────────────────────────────────────────────
 const MODE_MAP: Array<[string, RegExp]> = [
-  ['squad', /playlist.*?squad|PlaylistName.*?squad|GameMode.*?Squad/i],
-  ['duo',   /playlist.*?duo|PlaylistName.*?duo|GameMode.*?Duo/i],
-  ['solo',  /playlist.*?solo|PlaylistName.*?solo|GameMode.*?Solo/i],
+  ['squad', /NoBuildBR_Squad|DefaultSquad/i],
+  ['duo',   /NoBuildBR_Duo|ForbiddenFruit|DefaultDuo/i],
+  ['solo',  /NoBuildBR_Solo|DefaultSolo/i],
 ];
 
-// ─── Downed (local player knocked) ───────────────────────────────────────────
-const DOWNED_PATTERNS: RegExp[] = [
-  /LocalPlayer.*DBNO|LogFort.*LocalPlayer.*eliminated/i,
-  /KillerName=[A-Za-z0-9_.\-]+.*LocalPlayer.*DBNO/i,
-];
+function modeFromPlaylist(playlist: string): string {
+  for (const [mode, re] of MODE_MAP) {
+    if (re.test(playlist)) return mode;
+  }
+  return 'unknown';
+}
+
+// ─── LogParser ────────────────────────────────────────────────────────────────
 
 export class LogParser extends EventEmitter {
   private logPath: string;
   private watchTimer: ReturnType<typeof setInterval> | null = null;
   private fileSize = 0;
+
+  // Per-session state
+  private localPlayer = '';
+  private party = new Set<string>();
+  private currentPlaylist = '';
+  private inMatch = false;
+  private lastKillScore = 0;  // last accepted local-player kill score this match
 
   constructor(logPath: string) {
     super();
@@ -105,6 +113,10 @@ export class LogParser extends EventEmitter {
     this.start();
   }
 
+  get localPlayerName(): string {
+    return this.localPlayer;
+  }
+
   private checkNewContent(): void {
     let stat: fs.Stats;
     try { stat = fs.statSync(this.logPath); } catch { return; }
@@ -128,73 +140,71 @@ export class LogParser extends EventEmitter {
   private parseLine(line: string): void {
     if (!line.trim()) return;
     const timestamp = parseTimestamp(line);
+    let m: RegExpMatchArray | null;
 
-    // Match start
-    if (MATCH_START.test(line)) {
-      let gameMode = 'unknown';
-      for (const [mode, re] of MODE_MAP) {
-        if (re.test(line)) { gameMode = mode; break; }
-      }
-      console.log(`[log] Match start — mode: ${gameMode}`);
-      this.emit('match_start', { gameMode, timestamp } as MatchStartEvent);
+    // ── Login: track local player name and reset party
+    if ((m = line.match(P_LOGIN))) {
+      this.localPlayer = m[1];
+      this.party = new Set([this.localPlayer]);
+      console.log(`[log] Local player: ${this.localPlayer}`);
       return;
     }
 
-    // Match end
-    if (MATCH_END.test(line)) {
-      let placement = 0, totalPlayers = 0;
-      for (const re of PLACEMENT_PATTERNS) {
-        const m = line.match(re);
-        if (m) { placement = parseInt(m[1]); totalPlayers = parseInt(m[2]); break; }
+    // ── Party member added
+    if ((m = line.match(P_PARTY_ADD))) {
+      const added = m[1];
+      if (!this.party.has(added)) {
+        this.party.add(added);
+        const players = [...this.party];
+        console.log(`[log] Party update: ${players.join(', ')}`);
+        this.emit('party_update', { players, timestamp } as PartyUpdateEvent);
       }
-      console.log(`[log] Match end — placement: #${placement}/${totalPlayers}`);
-      this.emit('match_end', { placement, totalPlayers, timestamp } as MatchEndEvent);
       return;
     }
 
-    // Standalone placement lines
-    for (const re of PLACEMENT_PATTERNS) {
-      const m = line.match(re);
-      if (m) {
-        const placement = parseInt(m[1]);
-        const totalPlayers = parseInt(m[2]);
-        if (placement > 0 && totalPlayers > 1) {
-          console.log(`[log] Placement: #${placement}/${totalPlayers}`);
-          this.emit('placement', { placement, totalPlayers, timestamp } as MatchEndEvent);
-        }
-        break;
-      }
+    // ── Playlist detected
+    if ((m = line.match(P_PLAYLIST))) {
+      this.currentPlaylist = m[1];
+      console.log(`[log] Playlist: ${this.currentPlaylist}`);
+      this.emit('playlist_change', { playlist: this.currentPlaylist, timestamp } as PlaylistChangeEvent);
+      return;
     }
 
-    // Kills
-    for (const re of KILL_PATTERNS) {
-      const m = line.match(re);
-      if (m) {
-        const event: KillEvent = {
-          victim: m[2] ?? m[1],
-          weapon: m[3] ?? 'unknown',
-          timestamp,
-        };
-        console.log(`[log] Kill — victim: ${event.victim}, weapon: ${event.weapon}`);
-        this.emit('kill', event);
-        return;
-      }
+    // ── Match start
+    if (P_MATCH_START.test(line)) {
+      this.inMatch = true;
+      this.lastKillScore = 0;
+      const gameMode = modeFromPlaylist(this.currentPlaylist);
+      console.log(`[log] Match start — mode: ${gameMode} (${this.currentPlaylist})`);
+      this.emit('match_start', { gameMode, playlist: this.currentPlaylist, timestamp } as MatchStartEvent);
+      return;
     }
 
-    // Downed
-    for (const re of DOWNED_PATTERNS) {
-      if (re.test(line)) {
-        console.log('[log] Player downed');
-        this.emit('downed', { killer: 'unknown', weapon: 'unknown', timestamp } as DownedEvent);
-        return;
-      }
+    // ── Match end
+    if (P_MATCH_END.test(line)) {
+      this.inMatch = false;
+      console.log('[log] Match end');
+      this.emit('match_end', { timestamp } as MatchEndEvent);
+      return;
     }
 
-    // Game mode mid-match
-    for (const [mode, re] of MODE_MAP) {
-      if (re.test(line)) {
-        this.emit('mode_detected', { mode, timestamp });
-        break;
+    // ── Local player death
+    if ((m = line.match(P_DEATH_LOCAL))) {
+      // This line fires when local player dies with no teammates left — always local player
+      console.log(`[log] Local player death`);
+      this.emit('local_death', { timestamp } as LocalDeathEvent);
+      return;
+    }
+
+    // ── Kill score increment (best-effort local player kill tracking)
+    // OnRep_Kills fires for all players interleaved, with no player name.
+    // Heuristic: accept score N only if N == lastKillScore + 1 (sequential increment).
+    if (this.inMatch && (m = line.match(P_KILL_SCORE))) {
+      const score = parseInt(m[1]);
+      if (score === this.lastKillScore + 1) {
+        this.lastKillScore = score;
+        console.log(`[log] Kill score: ${score} (estimated local player)`);
+        this.emit('local_kill', { score, timestamp } as LocalKillEvent);
       }
     }
   }

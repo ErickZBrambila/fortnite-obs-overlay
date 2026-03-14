@@ -1,6 +1,6 @@
 {
   "name": "fortnite-obs-overlay",
-  "version": "1.0.0",
+  "version": "1.1.0",
   "description": "Fortnite player stats overlay for OBS with live session tracking",
   "main": "dist/server.js",
   "scripts": {

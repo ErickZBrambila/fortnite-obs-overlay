@@ -103,6 +103,17 @@ body {
   flex-shrink: 0;
 }
 
+.live-badge {
+  font-size: 7px;
+  font-weight: 800;
+  letter-spacing: 0.1em;
+  color: #00ff88;
+  background: rgba(0, 255, 136, 0.12);
+  border: 1px solid rgba(0, 255, 136, 0.4);
+  padding: 1px 3px;
+  flex-shrink: 0;
+}
+
 .card-name {
   font-size: 11px;
   font-weight: 800;
@@ -165,8 +176,18 @@ body {
   border-top: 1px solid var(--fn-border);
   font-size: 9px;
   color: var(--fn-text-muted);
-  text-align: right;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
   letter-spacing: 0.06em;
+}
+
+.placement-badge {
+  font-size: 11px;
+  font-weight: 800;
+  letter-spacing: 0.08em;
+  color: var(--fn-gold);
+  text-shadow: 0 0 8px var(--fn-gold-dim);
 }
 
 /* ─── Idle / loading state ───────────────────────────────────────────────────*/
@@ -200,5 +221,12 @@ body {
   100% { transform: scale(1);   color: var(--fn-accent); }
 }
 .kill-flash { animation: killFlash 0.8s ease-out forwards; }
+
+/* ─── Death flash ─────────────────────────────────────────────────────────────*/
+@keyframes deathFlash {
+  0%   { box-shadow: inset 0 0 0 2px var(--fn-red); background: rgba(255, 76, 76, 0.18); }
+  100% { box-shadow: none; background: transparent; }
+}
+.death-flash { animation: deathFlash 1.2s ease-out forwards; }
 
 .hidden { display: none !important; }

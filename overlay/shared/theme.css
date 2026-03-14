@@ -271,9 +271,10 @@ body {
   background: var(--fn-text-muted);
   flex-shrink: 0;
 }
-.fn-dot.live { background: #44ff88; box-shadow: 0 0 6px #44ff88; }
+.fn-dot.live    { background: #44ff88; box-shadow: 0 0 6px #44ff88; }
+.fn-dot.knocked { background: #ff9900; box-shadow: 0 0 6px #ff9900; animation: pulse 0.8s infinite; }
 .fn-dot.loading { background: var(--fn-gold); animation: pulse 1s infinite; }
-.fn-dot.error { background: var(--fn-red); }
+.fn-dot.error   { background: var(--fn-red); }
 
 @keyframes pulse {
   0%, 100% { opacity: 1; }
