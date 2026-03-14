@@ -8,6 +8,7 @@ import { fetchPlayerStats } from './fortnite-api';
 import type { PlayerStats } from './fortnite-api';
 import { setBaseline, hasBaseline, resetBaseline, computeSession } from './stats-tracker';
 import { LogParser } from './log-parser';
+import type { LocalKillEvent, LocalDeathEvent, PartyUpdateEvent, PlaylistChangeEvent } from './log-parser';
 import { setSquadPlayers, pollSquad, getSquadState } from './squad-tracker';
 
 const app = express();
@@ -22,6 +23,23 @@ let currentStats: PlayerStats | null = null;
 let pollTimer: ReturnType<typeof setInterval> | null = null;
 let squadPollTimer: ReturnType<typeof setInterval> | null = null;
 let logParser: LogParser | null = null;
+
+// Real-time kill/death counters derived from log — keyed by lowercase username
+const logSquadStats = new Map<string, { kills: number; deaths: number }>();
+
+function squadUsernames(): Set<string> {
+  return new Set(
+    RuntimeConfig.squadPlayers
+      .filter(p => p.enabled && p.username.trim())
+      .map(p => p.username.toLowerCase())
+  );
+}
+
+function broadcastLogSquadStats() {
+  const stats: Record<string, { kills: number; deaths: number }> = {};
+  logSquadStats.forEach((v, k) => { stats[k] = v; });
+  broadcast({ type: 'log_squad_stats', stats });
+}
 
 const VALID_THEMES = ['fortnite', 'minimal', 'neon', 'dark', 'gold', 'purple', 'glass'];
 
@@ -40,11 +58,46 @@ function initLogParser() {
   if (logParser) logParser.stop();
   if (!RuntimeConfig.logFilePath) return;
   logParser = new LogParser(RuntimeConfig.logFilePath);
-  logParser.on('kill',        (e) => broadcast({ type: 'log_kill',        ...e }));
-  logParser.on('match_start', (e) => broadcast({ type: 'log_match_start', ...e }));
-  logParser.on('match_end',   (e) => broadcast({ type: 'log_match_end',   ...e }));
-  logParser.on('placement',   (e) => broadcast({ type: 'log_placement',   ...e }));
-  logParser.on('downed',      (e) => broadcast({ type: 'log_downed',      ...e }));
+
+  logParser.on('match_start', (e) => {
+    broadcast({ type: 'log_match_start', ...e });
+    logSquadStats.clear();
+    broadcastLogSquadStats();
+  });
+
+  logParser.on('match_end', (e) => {
+    broadcast({ type: 'log_match_end', ...e });
+  });
+
+  // Best-effort local player kill — OnRep_Kills monotonic increment
+  logParser.on('local_kill', (e: LocalKillEvent) => {
+    const key = (currentUsername ?? '').toLowerCase();
+    if (!key) return;
+    const s = logSquadStats.get(key) ?? { kills: 0, deaths: 0 };
+    s.kills = e.score;  // score IS the cumulative kill count
+    logSquadStats.set(key, s);
+    broadcastLogSquadStats();
+    broadcast({ type: 'log_kill', killer: currentUsername, score: e.score, timestamp: e.timestamp });
+  });
+
+  logParser.on('local_death', (e: LocalDeathEvent) => {
+    const key = (currentUsername ?? '').toLowerCase();
+    if (!key) return;
+    const s = logSquadStats.get(key) ?? { kills: 0, deaths: 0 };
+    s.deaths++;
+    logSquadStats.set(key, s);
+    broadcastLogSquadStats();
+    broadcast({ type: 'log_downed', timestamp: e.timestamp });
+  });
+
+  logParser.on('party_update', (e: PartyUpdateEvent) => {
+    broadcast({ type: 'log_party_update', ...e });
+  });
+
+  logParser.on('playlist_change', (e: PlaylistChangeEvent) => {
+    broadcast({ type: 'log_playlist_change', ...e });
+  });
+
   logParser.start();
 }
 
@@ -140,6 +193,11 @@ wss.on('connection', (ws) => {
     ws.send(JSON.stringify({ type: 'squad_update', ...squadState }));
   }
 
+  // Send current log-derived squad stats
+  const currentLogStats: Record<string, { kills: number; deaths: number }> = {};
+  logSquadStats.forEach((v, k) => { currentLogStats[k] = v; });
+  ws.send(JSON.stringify({ type: 'log_squad_stats', stats: currentLogStats }));
+
   ws.on('message', async (raw) => {
     try {
       const msg = JSON.parse(raw.toString()) as {
@@ -178,6 +236,8 @@ wss.on('connection', (ws) => {
           break;
         }
         case 'squad_reset': {
+          logSquadStats.clear();
+          broadcastLogSquadStats();
           await pollAndBroadcastSquad();
           break;
         }
@@ -301,13 +361,126 @@ app.post('/api/squad', (req, res) => {
   RuntimeConfig.squadPlayers = players;
   saveConfig();
   setSquadPlayers(players);
+  logSquadStats.clear();
+  broadcastLogSquadStats();
   startSquadPolling();
   res.json({ ok: true });
 });
 
 app.post('/api/squad/reset', (_req, res) => {
+  logSquadStats.clear();
+  broadcastLogSquadStats();
   pollAndBroadcastSquad();
   res.json({ ok: true });
+});
+
+// ─── Overwolf GEP Bridge ──────────────────────────────────────────────────────
+// Receives events forwarded by the Overwolf background app (overwolf-bridge/)
+// and maps them to WebSocket broadcasts the overlay already understands.
+
+interface GepPayload {
+  type:     'event' | 'info';
+  name?:    string;              // for type=event
+  feature?: string;              // for type=info
+  data?:    Record<string, unknown>;
+  info?:    Record<string, unknown>;
+}
+
+// Sparse map: lowercase player name → { isAlive, isKnocked }
+const gepSquadState = new Map<string, { isAlive: boolean; isKnocked: boolean }>();
+
+app.post('/api/gep-event', (req, res) => {
+  const payload = req.body as GepPayload;
+  res.json({ ok: true }); // always ack immediately
+
+  if (payload.type === 'event') {
+    const { name, data = {} } = payload;
+
+    switch (name) {
+      case 'kill': {
+        const kills = parseInt(String(data.kills ?? '0'));
+        // Update logSquadStats so the squad overlay LIVE badge reflects GEP kills
+        const key = (currentUsername ?? '').toLowerCase();
+        if (key) {
+          const s = logSquadStats.get(key) ?? { kills: 0, deaths: 0 };
+          s.kills = kills;
+          logSquadStats.set(key, s);
+          broadcastLogSquadStats();
+        }
+        broadcast({ type: 'gep_kill', kills });
+        break;
+      }
+      case 'death':
+        broadcast({ type: 'gep_death' });
+        break;
+      case 'knocked_out':
+        broadcast({ type: 'gep_knocked' });
+        break;
+      case 'revived':
+        broadcast({ type: 'gep_revived' });
+        break;
+      case 'match_end': {
+        const placement    = parseInt(String(data.rank ?? data.placement ?? '0'));
+        const totalPlayers = parseInt(String(data.alive_players ?? data.totalPlayers ?? '0'));
+        broadcast({ type: 'gep_match_end', placement, totalPlayers });
+        break;
+      }
+      case 'game_exit':
+        gepSquadState.clear();
+        broadcast({ type: 'gep_squad_update', members: [] });
+        break;
+    }
+
+  } else if (payload.type === 'info') {
+    const { feature, info = {} } = payload;
+
+    if (feature === 'team') {
+      // info shape: { match_info: { team_member_0: '{"name":"...","is_alive":true,...}', ... } }
+      const matchInfo = (info.match_info ?? {}) as Record<string, string>;
+      Object.entries(matchInfo).forEach(([key, val]) => {
+        if (!key.startsWith('team_member_')) return;
+        try {
+          const member = typeof val === 'string' ? JSON.parse(val) : val;
+          const name = String(member.name ?? '').toLowerCase();
+          if (!name) return;
+          gepSquadState.set(name, {
+            isAlive:   Boolean(member.is_alive ?? true),
+            isKnocked: Boolean(member.is_knocked ?? false),
+          });
+        } catch { /* malformed */ }
+      });
+      broadcast({
+        type:    'gep_squad_update',
+        members: [...gepSquadState.entries()].map(([name, s]) => ({ name, ...s })),
+      });
+    }
+
+    if (feature === 'rank') {
+      const rankInfo  = (info.match_info ?? {}) as Record<string, string>;
+      const placement = parseInt(String(rankInfo.rank ?? '0'));
+      const total     = parseInt(String(rankInfo.alive_players ?? '0'));
+      if (placement > 0) broadcast({ type: 'gep_match_end', placement, totalPlayers: total });
+    }
+
+    if (feature === 'phase') {
+      const gameInfo = (info.game_info ?? {}) as Record<string, string>;
+      const phase    = String(gameInfo.phase ?? '');
+      if (phase) broadcast({ type: 'gep_phase', phase });
+    }
+
+    if (feature === 'match_info') {
+      const matchInfo = (info.match_info ?? {}) as Record<string, string>;
+      if (matchInfo.match_started === '1') {
+        gepSquadState.clear();
+        logSquadStats.clear();
+        broadcastLogSquadStats();
+        broadcast({ type: 'gep_match_start', gameMode: String(matchInfo.game_mode ?? '') });
+      }
+      if (matchInfo.match_ended === '1') {
+        broadcast({ type: 'gep_match_end', placement: 0, totalPlayers: 0 });
+      }
+    }
+  }
 });
 
 // ─── Start ────────────────────────────────────────────────────────────────────
