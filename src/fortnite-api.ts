@@ -1,4 +1,6 @@
-const BASE_URL = 'https://fortnite-api.com/v2';
+function getBaseUrl(apiKey: string): string {
+  return apiKey === 'mock' ? 'http://localhost:3001/v2' : 'https://fortnite-api.com/v2';
+}
 
 export interface ModeStats {
   wins: number;
@@ -55,7 +57,7 @@ function mapMode(raw: Record<string, number> | undefined): ModeStats {
 }
 
 export async function fetchPlayerStats(username: string, apiKey: string): Promise<PlayerStats> {
-  const url = `${BASE_URL}/stats/br/v2?name=${encodeURIComponent(username)}`;
+  const url = `${getBaseUrl(apiKey)}/stats/br/v2?name=${encodeURIComponent(username)}`;
 
   const response = await fetch(url, {
     headers: { Authorization: apiKey },

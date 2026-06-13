@@ -66,7 +66,30 @@ if (Test-Path ".env") {
     Ok ".env created from .env.example"
 }
 
-# ── 5. Done ───────────────────────────────────────────────────────────────────
+# ── 5. Auto-detect Fortnite log path ─────────────────────────────────────────
+Step "Looking for Fortnite log file..."
+
+$logPath = "$env:LOCALAPPDATA\FortniteGame\Saved\Logs\FortniteGame.log"
+
+if (Test-Path $logPath) {
+    Ok "Found: $logPath"
+
+    # Only write if FORTNITE_LOG_PATH is not already set in .env
+    $envContent = Get-Content ".env" -Raw
+    if ($envContent -match "^FORTNITE_LOG_PATH=\s*$" -or $envContent -match "^FORTNITE_LOG_PATH=$") {
+        $envContent = $envContent -replace "(?m)^FORTNITE_LOG_PATH=.*$", "FORTNITE_LOG_PATH=$logPath"
+        Set-Content ".env" $envContent -NoNewline
+        Ok "Log path written to .env"
+    } else {
+        Ok "FORTNITE_LOG_PATH already set in .env -- skipping"
+    }
+} else {
+    Warn "Fortnite log not found at expected path:"
+    Warn "  $logPath"
+    Warn "Launch Fortnite at least once, then set FORTNITE_LOG_PATH in .env manually."
+}
+
+# ── 6. Done ───────────────────────────────────────────────────────────────────
 Write-Host ""
 Write-Host "  Setup complete!" -ForegroundColor Green
 Write-Host ""
