@@ -22,6 +22,7 @@ let currentUsername: string | null = RuntimeConfig.defaultUsername || null;
 let currentStats: PlayerStats | null = null;
 let pollTimer: ReturnType<typeof setInterval> | null = null;
 let squadPollTimer: ReturnType<typeof setInterval> | null = null;
+let burstTimer: ReturnType<typeof setInterval> | null = null;
 let logParser: LogParser | null = null;
 
 // Real-time kill/death counters derived from log — keyed by lowercase username
@@ -67,6 +68,7 @@ function initLogParser() {
 
   logParser.on('match_end', (e) => {
     broadcast({ type: 'log_match_end', ...e });
+    startBurstPoll();
   });
 
   // Best-effort local player kill — OnRep_Kills monotonic increment
@@ -160,6 +162,38 @@ function startSquadPolling() {
   if (squadPollTimer) clearInterval(squadPollTimer);
   pollAndBroadcastSquad();
   squadPollTimer = setInterval(pollAndBroadcastSquad, RuntimeConfig.pollIntervalMs);
+}
+
+// ─── Burst polling ────────────────────────────────────────────────────────────
+// After a match ends, poll every 5s for up to 60s until the API reflects the
+// new match (kills or match count changes), then revert to the normal interval.
+
+function startBurstPoll() {
+  if (!currentUsername || !currentStats) return;
+  if (burstTimer) return;
+
+  const snapshotKills   = currentStats.stats.overall.kills;
+  const snapshotMatches = currentStats.stats.overall.matches;
+  let attempts = 0;
+  const MAX_ATTEMPTS = 12; // 12 × 5 s = 60 s ceiling
+
+  console.log('[poll] Burst polling started (match end detected)');
+
+  burstTimer = setInterval(async () => {
+    attempts++;
+    await fetchAndBroadcast();
+
+    const updated = currentStats && (
+      currentStats.stats.overall.kills   !== snapshotKills ||
+      currentStats.stats.overall.matches !== snapshotMatches
+    );
+
+    if (updated || attempts >= MAX_ATTEMPTS) {
+      clearInterval(burstTimer!);
+      burstTimer = null;
+      console.log(`[poll] Burst poll ended — ${updated ? 'stats updated' : 'timeout'} after ${attempts} poll(s)`);
+    }
+  }, 5000);
 }
 
 // ─── WebSocket ───────────────────────────────────────────────────────────────

@@ -55,6 +55,51 @@ const P_PLAYLIST    = /PLAYLIST: Playlist Object finished loading.*PlaylistName 
 const P_KILL_SCORE  = /AFortPlayerStateAthena::OnRep_Kills\(\) \(KillScore = (\d+)\)/;
 const P_DEATH_LOCAL = /LogSpectateAfterDeathViewTarget.*\[([^\]]+)\]\s+No teammates/;
 
+// ─── Kill sequence tracker ────────────────────────────────────────────────────
+// OnRep_Kills fires for ALL players interleaved with no player name attached.
+// Strategy: maintain one running stream per player, keyed by their current score.
+// When score N arrives, extend the stream ending at N-1. If multiple streams end
+// at N-1, prefer the one that started lowest (almost always the local player, who
+// starts at 1). The local player's kill count = highest score in any stream that
+// started at ≤ 3 (the ≤3 slack covers rare missed early log lines).
+
+class KillSequenceTracker {
+  private streams: Array<{ start: number; current: number }> = [];
+  private lastEmitted = 0;
+
+  reset(): void {
+    this.streams = [];
+    this.lastEmitted = 0;
+  }
+
+  // Returns new local kill count if it incremented this event, else null.
+  feed(score: number): number | null {
+    const extendable = this.streams.filter(s => s.current === score - 1);
+
+    if (extendable.length === 0) {
+      this.streams.push({ start: score, current: score });
+    } else {
+      const best = extendable.reduce((a, b) => a.start <= b.start ? a : b);
+      best.current = score;
+    }
+
+    const local = this.localScore();
+    if (local > this.lastEmitted) {
+      this.lastEmitted = local;
+      return local;
+    }
+    return null;
+  }
+
+  private localScore(): number {
+    let best = 0;
+    for (const s of this.streams) {
+      if (s.start <= 3 && s.current > best) best = s.current;
+    }
+    return best;
+  }
+}
+
 // ─── Playlist → game mode mapping ─────────────────────────────────────────────
 
 const MODE_MAP: Array<[string, RegExp]> = [
@@ -82,7 +127,7 @@ export class LogParser extends EventEmitter {
   private party = new Set<string>();
   private currentPlaylist = '';
   private inMatch = false;
-  private lastKillScore = 0;  // last accepted local-player kill score this match
+  private killTracker = new KillSequenceTracker();
 
   constructor(logPath: string) {
     super();
@@ -173,7 +218,7 @@ export class LogParser extends EventEmitter {
     // ── Match start
     if (P_MATCH_START.test(line)) {
       this.inMatch = true;
-      this.lastKillScore = 0;
+      this.killTracker.reset();
       const gameMode = modeFromPlaylist(this.currentPlaylist);
       console.log(`[log] Match start — mode: ${gameMode} (${this.currentPlaylist})`);
       this.emit('match_start', { gameMode, playlist: this.currentPlaylist, timestamp } as MatchStartEvent);
@@ -196,15 +241,13 @@ export class LogParser extends EventEmitter {
       return;
     }
 
-    // ── Kill score increment (best-effort local player kill tracking)
-    // OnRep_Kills fires for all players interleaved, with no player name.
-    // Heuristic: accept score N only if N == lastKillScore + 1 (sequential increment).
+    // ── Kill score — feed into sequence tracker
     if (this.inMatch && (m = line.match(P_KILL_SCORE))) {
       const score = parseInt(m[1]);
-      if (score === this.lastKillScore + 1) {
-        this.lastKillScore = score;
-        console.log(`[log] Kill score: ${score} (estimated local player)`);
-        this.emit('local_kill', { score, timestamp } as LocalKillEvent);
+      const localScore = this.killTracker.feed(score);
+      if (localScore !== null) {
+        console.log(`[log] Kill score: ${localScore} (estimated local player)`);
+        this.emit('local_kill', { score: localScore, timestamp } as LocalKillEvent);
       }
     }
   }
